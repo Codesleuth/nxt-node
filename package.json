@@ -4,11 +4,12 @@
   "description": "NXT command control in node.",
   "dependencies": {
     "debug": "~0.7.4",
-    "serialport": "~1.3.1"
+    "serialport": "~1.3.1",
+    "async": "~0.2.10"
   },
   "devDependencies": {},
   "scripts": {
-    "start": "node ./nxt.js",
+    "start": "node ./app.js",
     "test": "mocha -R spec --check_leaks"
   },
   "keywords": [
@@ -16,8 +17,10 @@
     "lego"
   ],
   "author": "David Wood",
-  "licenses" : [{
-    "type": "MIT",
-    "url": "http://github.com/codesleuth/nxt-node/raw/master/LICENSE"
-  }]
+  "licenses": [
+    {
+      "type": "MIT",
+      "url": "http://github.com/codesleuth/nxt-node/raw/master/LICENSE"
+    }
+  ]
 }
