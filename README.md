@@ -3,15 +3,14 @@
 An implementation of a LEGO NXT logic control suite in Node.js
 
 ## Installation
-1. Clone the repo locally and switch into the directory:
+Clone the repo locally and switch into the directory:
 ```bash
 $ git clone https://github.com/Codesleuth/nxt-node.git && cd nxt-node
 ```
-2. Ensure python 2.7 is accessible by npm. To check your version of python, type:
-```bash
-$ python --version
-Python 2.7.6
-```
+2. Ensure python 2.7 is accessible by npm. To check your version of python, type:```bash
+   $ python --version
+   Python 2.7.6
+   ```
 3. Install the packages with:
 ```bash
 $ npm install
