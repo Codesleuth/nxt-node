@@ -17,7 +17,8 @@ Install the packages with:
 $ npm install
 ```
 In some cases, Windows users will see `node-gyp` errors when `npm` attempts to compile `serialport`. The easiest way to solve this is to install [Visual Studio Express 2013 for Windows](http://www.visualstudio.com/en-us/products/visual-studio-express-vs.aspx), reopen the command prompt, and try again. The [serialport](https://github.com/voodootikigod/node-serialport) module needs to be built before it can be used and uses python to execute VSC to build. Please see the `serialport` readme for help if you have problems.
-4. If all went well, you should be able to execute the script with:
+
+If all went well, you should be able to execute the script with:
 ```bash
 $ npm start
 ```
