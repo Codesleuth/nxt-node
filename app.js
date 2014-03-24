@@ -129,5 +129,6 @@ nxt.on('error', function (err) {
 nxt.connect();
 
 process.on('SIGINT', function () {
+    listener.deafen();
     nxt.disconnect();
 });
