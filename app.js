@@ -32,6 +32,12 @@ function stopMotorA(done) {
     });
 }
 
+function waitHalfOneSecond(done) {
+    setTimeout(function () {
+        done();
+    }, 500);
+}
+
 function waitOneSecond(done) {
     setTimeout(function () {
         done();
@@ -54,6 +60,9 @@ function allStop(done) {
 
 function run() {
     async.series([
+        startMotorA,
+        waitHalfOneSecond,
+        waitOneSecond,
         startMotorA,
         beep,
         waitOneSecond,
