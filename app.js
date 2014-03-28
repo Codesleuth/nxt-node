@@ -18,24 +18,13 @@ function playtone() {
     }, 2000);
 }
 
-function startMotorA(done) {
+function startMotors(done) {
     nxt.startMotorA(function () {
-        debug('is motor A moving?');
-        done();
+        nxt.startMotorB(function () {
+            debug('are motors A and B moving?');
+            done();
+        });
     });
-}
-
-function stopMotorA(done) {
-    nxt.stopMotorA(function () {
-        debug('is motor A stopping?');
-        done();
-    });
-}
-
-function waitHalfOneSecond(done) {
-    setTimeout(function () {
-        done();
-    }, 500);
 }
 
 function waitOneSecond(done) {
@@ -60,9 +49,7 @@ function allStop(done) {
 
 function run() {
     async.series([
-        startMotorA,
-        waitHalfOneSecond,
-        startMotorA,
+        startMotors,
         //beep,
         waitOneSecond,
         //beep,
@@ -82,11 +69,6 @@ function run() {
         //beep,
         waitOneSecond,
         //beep,
-        waitOneSecond,
-        waitOneSecond,
-        waitOneSecond,
-        waitOneSecond,
-        waitOneSecond,
         allStop
     ]);
 }
