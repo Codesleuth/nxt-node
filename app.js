@@ -33,6 +33,12 @@ function waitOneSecond(done) {
     }, 1000);
 }
 
+function wait(done) {
+    setTimeout(function () {
+        done();
+    }, 17000);
+}
+
 function beep(done) {
     nxt.playtone(440, 500, function () {
         debug('can you hear me?');
@@ -49,26 +55,10 @@ function allStop(done) {
 
 function run() {
     async.series([
+        beep,
+        waitOneSecond,
         startMotors,
-        //beep,
-        waitOneSecond,
-        //beep,
-        waitOneSecond,
-        //beep,
-        waitOneSecond,
-        //beep,
-        waitOneSecond,
-        //beep,
-        waitOneSecond,
-        //beep,
-        waitOneSecond,
-        //beep,
-        waitOneSecond,
-        //beep,
-        waitOneSecond,
-        //beep,
-        waitOneSecond,
-        //beep,
+        wait,
         allStop
     ]);
 }
@@ -81,7 +71,7 @@ function handleMessage(msg) {
 
     debug('Received inbound push from %s with message "%s"', InboundMessage.From[0], InboundMessage.MessageText[0]);
 
-    if (InboundMessage.From[0] == account.from && InboundMessage.MessageText[0] == account.message) {
+    if (account.from.indexOf(InboundMessage.From[0]) > -1 && account.message.indexOf(InboundMessage.MessageText[0]) > -1) {
         run();
     }
 }
