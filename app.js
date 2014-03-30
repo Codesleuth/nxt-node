@@ -3,7 +3,24 @@ var NXT = require('./lib/nxt').NXT,
     async = require('async'),
     EventSource = require('eventsource'),
     account = require('./account'),
-    PushListener = require('./lib/pushlistener').PushListener;
+    PushListener = require('./lib/pushlistener').PushListener,
+    WebServer = require('./lib/webserver');
+
+Array.prototype.any = function (verifier) {
+    for (var i = this.length - 1; i >= 0; i--) {
+        if (verifier(this[i]) == true)
+            return true;
+    };
+    return false;
+};
+
+Array.prototype.all = function (verifier) {
+    for (var i = this.length - 1; i >= 0; i--) {
+        if (verifier(this[i]) == false)
+            return false;
+    };
+    return true;
+};
 
 var port = process.argv[2] || 'COM3';
 var nxt = new NXT(port);
@@ -17,6 +34,8 @@ function playtone() {
         playtone();
     }, 2000);
 }
+
+function noop() {};
 
 function startMotors(done) {
     nxt.startMotorA(function () {
@@ -71,7 +90,13 @@ function handleMessage(msg) {
 
     debug('Received inbound push from %s with message "%s"', InboundMessage.From[0], InboundMessage.MessageText[0]);
 
-    if (account.from.indexOf(InboundMessage.From[0]) > -1 && account.message.indexOf(InboundMessage.MessageText[0]) > -1) {
+    var matches = account.from.any(function (e) {
+        return InboundMessage.From[0] == e;
+    }) && account.message.any(function (e) {
+        return InboundMessage.MessageText[0].toUpperCase() == e.toUpperCase();
+    });
+
+    if (matches) {
         run();
     }
 }
@@ -113,7 +138,23 @@ nxt.on('error', function (err) {
 
 nxt.connect();
 
+
+var webServer = new WebServer();
+
+webServer.on('forward', function () {
+    startMotors(noop);
+}).on('stop', function () {
+    allStop(noop);
+}).on('beep', function () {
+    beep(noop);
+});
+
+webServer.listen();
+
+
+
 process.on('SIGINT', function () {
-    listener.deafen();
     nxt.disconnect();
+    webServer.deafen();
+    listener.deafen();
 });

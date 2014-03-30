@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>NXT Controller</title>
+
+    <script type="text/javascript">
+    (function (window) {
+        function createXHR()  {
+            return window.XMLHttpRequest ? new XMLHttpRequest() : new ActiveXObject("Microsoft.XMLHTTP");
+        }
+        var controller = {
+            forward: function () {
+                var xhr = createXHR();
+                xhr.open("GET", "/forward", true);
+                xhr.send();
+            },
+            stop: function () {
+                var xhr = createXHR();
+                xhr.open("GET", "/stop", true);
+                xhr.send();
+            },
+            beep: function () {
+                var xhr = createXHR();
+                xhr.open("GET", "/beep", true);
+                xhr.send();
+            }
+        };
+
+        window.controller = controller;
+    })(window);
+    
+    </script>
+</head>
+<body>
+
+<button onclick="window.controller.forward()">FORWARD</button><br />
+<button onclick="window.controller.stop()">STOP</button><br />
+<button onclick="window.controller.beep()">BEEP</button>
+
+</body>
+</html>
