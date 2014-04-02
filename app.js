@@ -2,7 +2,7 @@ var NXT = require('./lib/nxt').NXT,
     debug = require('debug')('nxt-node'),
     async = require('async'),
     EventSource = require('eventsource'),
-    account = require('./account'),
+    config = require('./config.json'),
     PushListener = require('./lib/pushlistener').PushListener,
     WebServer = require('./lib/webserver');
 
@@ -41,6 +41,15 @@ function startMotors(done) {
     nxt.startMotorA(function () {
         nxt.startMotorB(function () {
             debug('are motors A and B moving?');
+            done();
+        });
+    });
+}
+
+function startMotorsReverse(done) {
+    nxt.startMotorAReverse(function () {
+        nxt.startMotorBReverse(function () {
+            debug('are motors A and B reversing?');
             done();
         });
     });
@@ -87,14 +96,18 @@ function handleMessage(msg) {
         return;
 
     var InboundMessage = msg.message.InboundMessage;
+    var msg = InboundMessage.MessageText[0];
 
-    debug('Received inbound push from %s with message "%s"', InboundMessage.From[0], InboundMessage.MessageText[0]);
+    debug('Received inbound push from %s with message "%s"', InboundMessage.From[0], msg);
 
-    var matches = account.from.any(function (e) {
-        return InboundMessage.From[0] == e;
-    }) && account.message.any(function (e) {
-        return InboundMessage.MessageText[0].toUpperCase() == e.toUpperCase();
-    });
+    var parts = msg.split(' ');
+
+    var matches = parts.length > 1
+                  && parts[0].toUpperCase() == config.keyword.toUpperCase()
+                  && parts[1].toUpperCase() == config.message.toUpperCase()
+                  && config.from.any(function (e) {
+                      return InboundMessage.From[0] == e;
+                  });
 
     if (matches) {
         run();
@@ -102,7 +115,7 @@ function handleMessage(msg) {
 }
 
 var listener = new PushListener(handleMessage);
-listener.listen("http://push-codesleuth.rhcloud.com/listen/" + account.id);
+listener.listen("http://push-codesleuth.rhcloud.com/listen/" + config.accountid);
 
 var reconnectTimer = null;
 
@@ -143,6 +156,8 @@ var webServer = new WebServer();
 
 webServer.on('forward', function () {
     startMotors(noop);
+}).on('reverse', function () {
+    startMotorsReverse(noop);
 }).on('stop', function () {
     allStop(noop);
 }).on('beep', function () {
