@@ -64,7 +64,7 @@ function waitOneSecond(done) {
 function wait(done) {
     setTimeout(function () {
         done();
-    }, 17000);
+    }, 20000);
 }
 
 function beep(done) {
