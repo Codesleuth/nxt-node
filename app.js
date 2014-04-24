@@ -2,8 +2,25 @@ var NXT = require('./lib/nxt').NXT,
     debug = require('debug')('nxt-node'),
     async = require('async'),
     EventSource = require('eventsource'),
-    account = require('./account'),
-    PushListener = require('./lib/pushlistener').PushListener;
+    config = require('./config.json'),
+    PushListener = require('./lib/pushlistener').PushListener,
+    WebServer = require('./lib/webserver');
+
+Array.prototype.any = function (verifier) {
+    for (var i = this.length - 1; i >= 0; i--) {
+        if (verifier(this[i]) == true)
+            return true;
+    };
+    return false;
+};
+
+Array.prototype.all = function (verifier) {
+    for (var i = this.length - 1; i >= 0; i--) {
+        if (verifier(this[i]) == false)
+            return false;
+    };
+    return true;
+};
 
 var port = process.argv[2] || 'COM3';
 var nxt = new NXT(port);
@@ -18,17 +35,23 @@ function playtone() {
     }, 2000);
 }
 
-function startMotorA(done) {
+function noop() {};
+
+function startMotors(done) {
     nxt.startMotorA(function () {
-        debug('is motor A moving?');
-        done();
+        nxt.startMotorB(function () {
+            debug('are motors A and B moving?');
+            done();
+        });
     });
 }
 
-function stopMotorA(done) {
-    nxt.stopMotorA(function () {
-        debug('is motor A stopping?');
-        done();
+function startMotorsReverse(done) {
+    nxt.startMotorAReverse(function () {
+        nxt.startMotorBReverse(function () {
+            debug('are motors A and B reversing?');
+            done();
+        });
     });
 }
 
@@ -36,6 +59,12 @@ function waitOneSecond(done) {
     setTimeout(function () {
         done();
     }, 1000);
+}
+
+function wait(done) {
+    setTimeout(function () {
+        done();
+    }, 20000);
 }
 
 function beep(done) {
@@ -54,26 +83,10 @@ function allStop(done) {
 
 function run() {
     async.series([
-        startMotorA,
         beep,
         waitOneSecond,
-        beep,
-        waitOneSecond,
-        beep,
-        waitOneSecond,
-        beep,
-        waitOneSecond,
-        beep,
-        waitOneSecond,
-        beep,
-        waitOneSecond,
-        beep,
-        waitOneSecond,
-        beep,
-        waitOneSecond,
-        beep,
-        waitOneSecond,
-        beep,
+        startMotors,
+        wait,
         allStop
     ]);
 }
@@ -83,16 +96,26 @@ function handleMessage(msg) {
         return;
 
     var InboundMessage = msg.message.InboundMessage;
+    var msg = InboundMessage.MessageText[0];
 
-    debug('Received inbound push from %s with message "%s"', InboundMessage.From[0], InboundMessage.MessageText[0]);
+    debug('Received inbound push from %s with message "%s"', InboundMessage.From[0], msg);
 
-    if (InboundMessage.From[0] == account.from && InboundMessage.MessageText[0] == account.message) {
+    var parts = msg.split(' ');
+
+    var matches = parts.length > 1
+                  && parts[0].toUpperCase() == config.keyword.toUpperCase()
+                  && parts[1].toUpperCase() == config.message.toUpperCase()
+                  && config.from.any(function (e) {
+                      return InboundMessage.From[0] == e;
+                  });
+
+    if (matches) {
         run();
     }
 }
 
 var listener = new PushListener(handleMessage);
-listener.listen("http://push-codesleuth.rhcloud.com/listen/" + account.id);
+listener.listen("http://push-codesleuth.rhcloud.com/listen/" + config.accountid);
 
 var reconnectTimer = null;
 
@@ -128,6 +151,25 @@ nxt.on('error', function (err) {
 
 nxt.connect();
 
+
+var webServer = new WebServer();
+
+webServer.on('forward', function () {
+    startMotors(noop);
+}).on('reverse', function () {
+    startMotorsReverse(noop);
+}).on('stop', function () {
+    allStop(noop);
+}).on('beep', function () {
+    beep(noop);
+});
+
+webServer.listen();
+
+
+
 process.on('SIGINT', function () {
     nxt.disconnect();
+    webServer.deafen();
+    listener.deafen();
 });

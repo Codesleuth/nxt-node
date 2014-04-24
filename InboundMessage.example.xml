@@ -1,8 +1,0 @@
-<InboundMessage>
-    <Id>e044c95c-41b3-46be-81bf-e520b2c0a2c9</Id>
-    <MessageId>af6a8d0d-fd75-4862-b50b-a769c71a4b52</MessageId>
-    <AccountId>246d4281-a2ca-4d82-9640-c89c8f2cf0d4</AccountId>
-    <MessageText>Example Inbound Message</MessageText>
-    <From>447123456789</From>
-    <To>447987654321</To>
-</InboundMessage>
